@@ -36,6 +36,7 @@ interface TaxesState {
   youthIrs: { [K in (typeof SUPPORTED_TAX_RANK_YEARS)[number]]: YouthIrs };
   colors: Colors;
   rnh: boolean;
+  disability: boolean;
   rnhTax: number;
   firstYear: boolean;
   secondYear: boolean;
@@ -114,6 +115,7 @@ const useTaxesStore = defineStore({
       2025: 522.50,
     },
     rnh: false,
+    disability: false,
     rnhTax: 0.2,
     firstYear: false,
     secondYear: false,
@@ -240,11 +242,21 @@ const useTaxesStore = defineStore({
           ? this.expensesNeeded - this.expenses
           : 0;
 
-      return (
-        (grossIncome - this.youthIrsDiscount) *
-          (this.firstYear ? 0.375 : this.secondYear ? 0.5625 : 0.75) +
-        expensesMissing
-      );
+      // Apply youth IRS discount
+      let taxable = (grossIncome - this.youthIrsDiscount) *
+                    (this.firstYear ? 0.375 : this.secondYear ? 0.5625 : 0.75);
+
+      // Apply disability exemption if applicable
+      if (this.disability) {
+        const disabilityExemption = Math.min(grossIncome * 0.15, 2500);
+        taxable -= disabilityExemption;
+      }
+
+      // Add expensesMissing
+      taxable += expensesMissing;
+
+      // Ensure taxable income is not negative
+      return Math.max(taxable, 0);
     },
     youthIrsDiscount() {
       if (!this.benefitsOfYouthIrs) {
@@ -473,6 +485,10 @@ const useTaxesStore = defineStore({
     setRnh(value: boolean) {
       this.rnh = value;
       updateUrlQuery({ rnh: this.rnh });
+    },
+    setDisability(value: boolean) {
+      this.disability = value;
+      updateUrlQuery({ disability: this.disability });
     },
     setParameterFromUrl(
       value: any,
