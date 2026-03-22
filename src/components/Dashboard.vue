@@ -34,7 +34,7 @@
         </div>
         <InfoButton>
           <p class="text-sm w-64 text-center">
-            There are a number of changes between 2023 and 2024, such as the
+            There are a number of changes between years, such as the
             IAS value and the IRS brackets.
           </p>
         </InfoButton>

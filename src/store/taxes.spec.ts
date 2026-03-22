@@ -370,5 +370,17 @@ describe("Taxes Store", () => {
     expect(taxesStore.getTaxRanks[6].max).toEqual(50483);
     expect(taxesStore.getTaxRanks[7].max).toEqual(78834);
     expect(taxesStore.getTaxRanks[8].max).toBeFalsy();
+
+    taxesStore.setCurrentTaxRankYear(2026);
+
+    expect(taxesStore.getTaxRanks[0].max).toEqual(8342);
+    expect(taxesStore.getTaxRanks[1].max).toEqual(12587);
+    expect(taxesStore.getTaxRanks[2].max).toEqual(17838);
+    expect(taxesStore.getTaxRanks[3].max).toEqual(23089);
+    expect(taxesStore.getTaxRanks[4].max).toEqual(29397);
+    expect(taxesStore.getTaxRanks[5].max).toEqual(43090);
+    expect(taxesStore.getTaxRanks[6].max).toEqual(46566);
+    expect(taxesStore.getTaxRanks[7].max).toEqual(86634);
+    expect(taxesStore.getTaxRanks[8].max).toBeFalsy();
   });
 });

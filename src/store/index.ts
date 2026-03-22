@@ -12,7 +12,8 @@ import { updateUrlQuery, clearUrlQuery } from "@/router";
 
 export const YEAR_BUSINESS_DAYS = 248;
 //export const MONTH_BUSINESS_DAYS = 22; // No longer used by this simulator, only year business days are taken into account
-export const SUPPORTED_TAX_RANK_YEARS = ([2023, 2024, 2025]).sort((a, b) => b - a);
+export const SUPPORTED_TAX_RANK_YEARS = ([2023, 2024, 2025, 2026]).sort((a, b) => b - a);
+export const DEFAULT_TAX_RANK_YEAR: (typeof SUPPORTED_TAX_RANK_YEARS)[number] = 2025;
 const SIMULATIONS_LOCAL_STORE_KEY = "net_income_simulations";
 
 interface TaxesState {
@@ -73,7 +74,7 @@ const useTaxesStore = defineStore({
     expenses: 0,
     expensesAuto: true,
     ssTax: 0.214,
-    currentTaxRankYear: SUPPORTED_TAX_RANK_YEARS[0], //This array should be sorted in descending order
+    currentTaxRankYear: DEFAULT_TAX_RANK_YEAR,
     taxRanks: {
       2023: [
         { id: 1, min: 0, max: 7479, normalTax: 0.145, averageTax: 0.145 },
@@ -108,11 +109,23 @@ const useTaxesStore = defineStore({
         { id: 8, min: 44987, max: 83696, normalTax: 0.45, averageTax: 0.35408 },
         { id: 9, min: 83696, normalTax: 0.48, max: null, averageTax: null },
       ],
+      2026: [
+        { id: 1, min: 0, max: 8342, normalTax: 0.125, averageTax: 0.125 },
+        { id: 2, min: 8342, max: 12587, normalTax: 0.157, averageTax: 0.13579 },
+        { id: 3, min: 12587, max: 17838, normalTax: 0.212, averageTax: 0.15823 },
+        { id: 4, min: 17838, max: 23089, normalTax: 0.241, averageTax: 0.17705 },
+        { id: 5, min: 23089, max: 29397, normalTax: 0.311, averageTax: 0.20579 },
+        { id: 6, min: 29397, max: 43090, normalTax: 0.349, averageTax: 0.2513 },
+        { id: 7, min: 43090, max: 46566, normalTax: 0.431, averageTax: 0.26472 },
+        { id: 8, min: 46566, max: 86634, normalTax: 0.446, averageTax: 0.34856 },
+        { id: 9, min: 86634, normalTax: 0.48, max: null, averageTax: null },
+      ],
     },
     iasPerYear: {
       2023: 480.43,
       2024: 509.26,
       2025: 522.50,
+      2026: 537.13,
     },
     rnh: false,
     disability: false,
@@ -141,6 +154,18 @@ const useTaxesStore = defineStore({
         5: { maxDiscountPercentage: 0.25, maxDiscountIasMultiplier: 10 },
       },
       2025: {
+        1: { maxDiscountPercentage: 1, maxDiscountIasMultiplier: 55 },
+        2: { maxDiscountPercentage: 0.75, maxDiscountIasMultiplier: 55 },
+        3: { maxDiscountPercentage: 0.75, maxDiscountIasMultiplier: 55 },
+        4: { maxDiscountPercentage: 0.75, maxDiscountIasMultiplier: 55 },
+        5: { maxDiscountPercentage: 0.50, maxDiscountIasMultiplier: 55 },
+        6: { maxDiscountPercentage: 0.50, maxDiscountIasMultiplier: 55 },
+        7: { maxDiscountPercentage: 0.50, maxDiscountIasMultiplier: 55 },
+        8: { maxDiscountPercentage: 0.25, maxDiscountIasMultiplier: 55 },
+        9: { maxDiscountPercentage: 0.25, maxDiscountIasMultiplier: 55 },
+        10: { maxDiscountPercentage: 0.25, maxDiscountIasMultiplier: 55 },
+      },
+      2026: {
         1: { maxDiscountPercentage: 1, maxDiscountIasMultiplier: 55 },
         2: { maxDiscountPercentage: 0.75, maxDiscountIasMultiplier: 55 },
         3: { maxDiscountPercentage: 0.75, maxDiscountIasMultiplier: 55 },
@@ -271,7 +296,7 @@ const useTaxesStore = defineStore({
       return Math.min(maxDiscount, maxDiscountIas);
     },
     youthIrsRange() {
-      return this.currentTaxRankYear === 2025 ? 10 : 5;
+      return Object.keys(this.youthIrs[this.currentTaxRankYear]).length;
     },
     taxRank(): TaxRank {
       return this.taxRanks[this.currentTaxRankYear].filter(
@@ -657,8 +682,7 @@ const useTaxesStore = defineStore({
       this.updateStoredSimulations();
     },
     isYearOfYouthIrsValid (value: number)  {
-      const validRange = this.currentTaxRankYear === 2025 ? 10 : 5;
-      return value >= 1 && value <= validRange;
+      return value >= 1 && value <= this.youthIrsRange;
     },
     reset() {
       this.setIncome(null);
@@ -668,7 +692,7 @@ const useTaxesStore = defineStore({
       this.setNrDaysOff(0);
       this.setSsDiscount(0);
       this.setExpenses(0);
-      this.setCurrentTaxRankYear( SUPPORTED_TAX_RANK_YEARS[0] );
+      this.setCurrentTaxRankYear( DEFAULT_TAX_RANK_YEAR );
       this.setSsFirstYear(false);
       this.setFirstYear(false);
       this.setSecondYear(false);

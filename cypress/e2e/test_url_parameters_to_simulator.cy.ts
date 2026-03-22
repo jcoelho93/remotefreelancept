@@ -113,7 +113,7 @@ describe("pass currentTaxRankYear through url parameters", () => {
   });
 
   it("doesn't update currentTaxRankYear if invalid year from url", () => {
-    cy.visit("/#/?income=50000&currentTaxRankYear=2026"); // change URL to match your dev URL
+    cy.visit("/#/?income=50000&currentTaxRankYear=2027"); // change URL to match your dev URL
     cy.get('[data-cy="tax-rank-years-dropdown"] input:first-of-type').should(
       "have.value",
       "2025",
